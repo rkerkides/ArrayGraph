@@ -47,14 +47,14 @@ public class Edge<F extends Comparable<F>> implements Comparable<Edge<F>> {
     /**
      * Indicates whether some other edge is "equal to" this one, based on the start and end vertices.
      *
-     * @param o The reference object with which to compare.
+     * @param other The reference object with which to compare.
      * @return true if this object is the same as the obj argument; false otherwise.
      */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Edge)) return false;
-        Edge<?> edge = (Edge<?>) o;
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Edge)) return false;
+        Edge<?> edge = (Edge<?>) other;
         return v1.equals(edge.getV1()) && v2.equals(edge.getV2());
     }
 

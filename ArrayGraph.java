@@ -66,13 +66,11 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      */
     @Override
     public boolean deleteEdge(Edge<F> e) {
-        // Find and remove the edge, then shift remaining edges to fill the gap
-        for (int i = 0; i < numEdges; i++) {
-            if (edges[i].equals(e)) {
-                System.arraycopy(edges, i + 1, edges, i, numEdges - i - 1);
-                edges[--numEdges] = null; // Setting to null to help with garbage collection
-                return true;
-            }
+        int index = Arrays.binarySearch(edges, 0, numEdges, e);
+        if (index >= 0) {
+            System.arraycopy(edges, index + 1, edges, index, numEdges - index - 1);
+            edges[--numEdges] = null;
+            return true;
         }
         return false;
     }
@@ -85,23 +83,36 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      */
     @Override
     public boolean deleteVertex(Vertex<F> v) {
-        // Find and remove the vertex, then shift remaining vertices to fill the gap
-        for (int i = 0; i < numVertices; i++) {
-            if (vertices[i].equals(v)) {
-                System.arraycopy(vertices, i + 1, vertices, i, numVertices - i - 1);
-                vertices[--numVertices] = null; // Setting to null to help with garbage collection
+        int index = Arrays.binarySearch(vertices, 0, numVertices, v);
+        if (index >= 0) {
+            // Remove the vertex by shifting elements
+            System.arraycopy(vertices, index + 1, vertices, index, numVertices - index - 1);
+            vertices[--numVertices] = null;
 
-                // Delete all edges connected to the vertex
-                for (int j = numEdges - 1; j >= 0; j--) {
-                    if (edges[j].getV1().equals(v) || edges[j].getV2().equals(v)) {
-                        deleteEdge(edges[j]);
+            // Instead of deleting edges connected to the vertex one by one,
+            // mark them and then compact the array in one pass.
+            int compactIndex = 0; // Index for where to place the next unmarked edge
+            for (int i = 0; i < numEdges; i++) {
+                if (!edges[i].getV1().equals(v) && !edges[i].getV2().equals(v)) {
+                    // If the edge is not connected to the deleted vertex, retain it
+                    if (compactIndex != i) {
+                        edges[compactIndex] = edges[i];
                     }
-                }
-                return true;
+                    compactIndex++;
+                } // Edges connected to the deleted vertex are implicitly discarded
             }
+
+            // Fill the "empty" part of the array with nulls
+            for (int i = compactIndex; i < numEdges; i++) {
+                edges[i] = null;
+            }
+
+            numEdges = compactIndex; // Update the number of edges
+            return true;
         }
         return false;
     }
+
 
     /**
      * Returns a set containing all the vertices in the graph.
@@ -130,11 +141,7 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      * @return true if the vertex exists, false otherwise
      */
     private boolean containsVertex(Vertex<F> v) {
-        // Iterate over vertices to check for existence
-        for (int i = 0; i < numVertices; i++) {
-            if (vertices[i].equals(v)) return true;
-        }
-        return false;
+        return Arrays.binarySearch(vertices, 0, numVertices, v) >= 0;
     }
 
     /**
@@ -144,11 +151,7 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      * @return true if the edge exists, false otherwise
      */
     private boolean containsEdge(Edge<F> e) {
-        // Iterate over edges to check for existence
-        for (int i = 0; i < numEdges; i++) {
-            if (edges[i].equals(e)) return true;
-        }
-        return false;
+        return Arrays.binarySearch(edges, 0, numEdges, e) >= 0;
     }
 
     /**
@@ -156,7 +159,7 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      * This method uses binary search to find the insertion point and shifts elements to the right
      * to make space for the new element.
      *
-     * @param <T> the type of elements in the array, which must be comparable based on the provided comparator
+     * @param <T> the type of elements in the array, which must implement the Comparable interface
      * @param array the sorted array into which the element will be inserted
      * @param element the element to insert into the array
      * @param count the current number of elements in the array

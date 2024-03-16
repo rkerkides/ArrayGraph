@@ -38,31 +38,17 @@ public class Vertex<F extends Comparable<F>> implements Comparable<Vertex<F>> {
     }
 
     /**
-     * Compares this vertex with another vertex for order.
-     * Returns a negative integer, zero, or a positive integer as this vertex's value
-     * is less than, equal to, or greater than the specified vertex's value.
-     *
-     * @param other The vertex to be compared.
-     * @return a negative integer, zero, or a positive integer as this vertex
-     *         is less than, equal to, or greater than the specified vertex.
-     */
-    @Override
-    public int compareTo(Vertex<F> other) {
-        return this.value.compareTo(other.value);
-    }
-
-    /**
      * Indicates whether some other object is "equal to" this one.
      * The equality is based on the value of the vertices.
      *
-     * @param o The reference object with which to compare.
+     * @param other The reference object with which to compare.
      * @return true if this object is the same as the obj argument; false otherwise.
      */
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Vertex)) return false;
-        Vertex<?> vertex = (Vertex<?>) o;
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Vertex)) return false;
+        Vertex<?> vertex = (Vertex<?>) other;
         return value.equals(vertex.value);
     }
 
@@ -75,6 +61,20 @@ public class Vertex<F extends Comparable<F>> implements Comparable<Vertex<F>> {
     @Override
     public int hashCode() {
         return value.hashCode();
+    }
+
+    /**
+     * Compares this vertex with another vertex for order.
+     * Returns a negative integer, zero, or a positive integer as this vertex's value
+     * is less than, equal to, or greater than the specified vertex's value.
+     *
+     * @param other The vertex to be compared.
+     * @return a negative integer, zero, or a positive integer as this vertex
+     *         is less than, equal to, or greater than the specified vertex.
+     */
+    @Override
+    public int compareTo(Vertex<F> other) {
+        return this.value.compareTo(other.value);
     }
 
     /**
