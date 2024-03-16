@@ -1,160 +1,174 @@
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Implements a graph abstract data type (ADT) using arrays to store vertices and edges.
+ * This class enforces that no duplicate vertices can be added, edges can only exist between
+ * added vertices, and maintains vertices and edges sorted in ascending order.
+ *
+ * @param <F> the type of the labels for vertices in the graph, which must be comparable
+ */
+@SuppressWarnings("unchecked")
 public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
     private final Vertex<F>[] vertices;
     private final Edge<F>[] edges;
     private int numVertices = 0;
     private int numEdges = 0;
 
-
-    // Suppressing unchecked cast warnings
-    @SuppressWarnings("unchecked")
+    /**
+     * Constructs an ArrayGraph with predefined capacities for vertices and edges.
+     */
     public ArrayGraph() {
-        // Due to type erasure, arrays of generic types cannot be directly instantiated
-        // The workaround involves creating an array of a raw type and casting it
-        vertices = (Vertex<F>[])new Vertex<?>[20];
-        edges = (Edge<F>[])new Edge<?>[50];
+        vertices = (Vertex<F>[]) new Vertex<?>[20]; // Maximum of 20 vertices
+        edges = (Edge<F>[]) new Edge<?>[50]; // Maximum of 50 edges
     }
 
-
-    // Adds an edge to the graph if it doesn't already exist and both vertices are present
+    /**
+     * Adds an edge to the graph if it doesn't already exist and both vertices of the edge are present.
+     *
+     * @param e the edge to add
+     * @return true if the edge was added, false otherwise
+     */
     @Override
     public boolean addEdge(Edge<F> e) {
-        // Check for edge capacity, existence, and presence of its vertices
-        if (numEdges == edges.length || containsEdge(e) || !containsVertex(e.getV1())
-                || !containsVertex(e.getV2())) return false;
-        edges[numEdges++] = e; // Add edge and increment edge count
-        sortEdges();
+        // Check if adding the edge is possible (not exceeding capacity, vertices exist, edge doesn't exist)
+        if (numEdges >= edges.length || containsEdge(e) || !containsVertex(e.getV1()) || !containsVertex(e.getV2()))
+            return false;
+
+        // Insert the edge in sorted order, sorting edges by the value of the first vertex
+        insertSorted(edges, e, numEdges++);
         return true;
     }
 
-    // Adds a vertex to the graph if it doesn't already exist
+    /**
+     * Adds a vertex to the graph if it doesn't already exist.
+     *
+     * @param v the vertex to add
+     * @return true if the vertex was added, false otherwise
+     */
     @Override
     public boolean addVertex(Vertex<F> v) {
-        // Check for vertex capacity and existence
-        if (numVertices == vertices.length || containsVertex(v)) return false;
-        vertices[numVertices++] = v; // Add vertex and increment vertex count
-        sortVertices();
+        // Check if adding the vertex is possible (not exceeding capacity, vertex doesn't exist)
+        if (numVertices >= vertices.length || containsVertex(v))
+            return false;
+
+        // Insert the vertex in sorted order
+        insertSorted(vertices, v, numVertices++);
         return true;
     }
 
-    // Deletes an edge from the graph, if it exists
+    /**
+     * Deletes an edge from the graph if it exists.
+     *
+     * @param e the edge to delete
+     * @return true if the edge was deleted, false otherwise
+     */
     @Override
     public boolean deleteEdge(Edge<F> e) {
-        // Check if the edge exists in the graph; if not, return false.
-        if (!containsEdge(e)) return false;
-
-        // Iterate through the edges array to find the matching edge.
+        // Find and remove the edge, then shift remaining edges to fill the gap
         for (int i = 0; i < numEdges; i++) {
             if (edges[i].equals(e)) {
-                // Once found, shift the subsequent edges one position to the left
-                // to fill the gap created by the removed edge.
-                for (int j = i; j < numEdges - 1; j++) {
-                    edges[j] = edges[j + 1];
-                }
-                // Decrement the count of edges to reflect the removal.
-                numEdges--;
-                return true; // Return true to indicate the edge was successfully deleted.
+                System.arraycopy(edges, i + 1, edges, i, numEdges - i - 1);
+                edges[--numEdges] = null; // Setting to null to help with garbage collection
+                return true;
             }
         }
-        return false; // In case the edge was not found (which should not happen due to the initial check), return false.
+        return false;
     }
 
-    // Deletes a vertex from the graph, if it exists, along with any connected edges
+    /**
+     * Deletes a vertex from the graph if it exists, along with any edges connected to it.
+     *
+     * @param v the vertex to delete
+     * @return true if the vertex was deleted, false otherwise
+     */
     @Override
     public boolean deleteVertex(Vertex<F> v) {
-        // Check if the vertex exists in the graph; if not, return false.
-        if (!containsVertex(v)) return false;
-
-        // Iterate through the vertices array to find the matching vertex.
+        // Find and remove the vertex, then shift remaining vertices to fill the gap
         for (int i = 0; i < numVertices; i++) {
             if (vertices[i].equals(v)) {
-                // Once found, shift the subsequent vertices one position to the left
-                // to fill the gap created by the removed vertex.
-                for (int j = i; j < numVertices - 1; j++) {
-                    vertices[j] = vertices[j + 1];
-                }
-                // Decrement the count of vertices to reflect the removal.
-                numVertices--;
+                System.arraycopy(vertices, i + 1, vertices, i, numVertices - i - 1);
+                vertices[--numVertices] = null; // Setting to null to help with garbage collection
 
-                // Iterate through the edges array to remove any edges connected to the removed vertex.
-                // Note: Adjusting the loop index inside the loop to account for the array size change
-                // when an edge is deleted.
-                for (int j = 0; j < numEdges; j++) {
+                // Delete all edges connected to the vertex
+                for (int j = numEdges - 1; j >= 0; j--) {
                     if (edges[j].getV1().equals(v) || edges[j].getV2().equals(v)) {
                         deleteEdge(edges[j]);
-                        j--; // Decrement the index to revisit the same position, as elements have shifted.
                     }
                 }
-                return true; // Return true to indicate the vertex (and any connected edges) was successfully deleted.
+                return true;
             }
         }
-        return false; // In case the vertex was not found (which should not happen due to the initial check), return false.
+        return false;
     }
 
-    // Returns a set of all vertices in the graph
-    // Consider TreeSet for sorting
+    /**
+     * Returns a set containing all the vertices in the graph.
+     *
+     * @return a Set of all vertices
+     */
     @Override
     public Set<Vertex<F>> vertexSet() {
-        Set<Vertex<F>> vertexSet = new HashSet<>();
-        for (int i = 0; i < numVertices; i++) {
-            vertexSet.add(vertices[i]);
-        }
-        return vertexSet;
+        return new HashSet<>(Arrays.asList(vertices).subList(0, numVertices));
     }
 
-
-    // Returns a set of all edges in the graph
+    /**
+     * Returns a set containing all the edges in the graph.
+     *
+     * @return a Set of all edges
+     */
     @Override
     public Set<Edge<F>> edgeSet() {
-        Set<Edge<F>> edgeSet = new HashSet<>();
-        for (int i = 0; i < numEdges; i++) {
-            edgeSet.add(edges[i]);
-        }
-        return edgeSet;
+        return new HashSet<>(Arrays.asList(edges).subList(0, numEdges));
     }
 
-    // Helper method to check if a vertex exists in the graph
+    /**
+     * Checks if a vertex exists in the graph.
+     *
+     * @param v the vertex to check
+     * @return true if the vertex exists, false otherwise
+     */
     private boolean containsVertex(Vertex<F> v) {
+        // Iterate over vertices to check for existence
         for (int i = 0; i < numVertices; i++) {
             if (vertices[i].equals(v)) return true;
         }
         return false;
     }
 
-    // Helper method to check if an edge exists in the graph
+    /**
+     * Checks if an edge exists in the graph.
+     *
+     * @param e the edge to check
+     * @return true if the edge exists, false otherwise
+     */
     private boolean containsEdge(Edge<F> e) {
+        // Iterate over edges to check for existence
         for (int i = 0; i < numEdges; i++) {
             if (edges[i].equals(e)) return true;
         }
         return false;
     }
 
-    // Sorts the vertices array to maintain order
-    private void sortVertices() {
-        for (int i = 0; i < numVertices; i++) {
-            for (int j = i + 1; j < numVertices; j++) {
-                if (vertices[i].getValue().compareTo(vertices[j].getValue()) > 0) {
-                    Vertex<F> temp = vertices[i];
-                    vertices[i] = vertices[j];
-                    vertices[j] = temp;
-                }
-            }
+    /**
+     * Inserts an element into a sorted array in its correct position to maintain the sorted order.
+     * This method uses binary search to find the insertion point and shifts elements to the right
+     * to make space for the new element.
+     *
+     * @param <T> the type of elements in the array, which must be comparable based on the provided comparator
+     * @param array the sorted array into which the element will be inserted
+     * @param element the element to insert into the array
+     * @param count the current number of elements in the array
+     */
+    private <T> void insertSorted(T[] array, T element, int count) {
+        int insertionPoint = Arrays.binarySearch(array, 0, count, element);
+        if (insertionPoint < 0) {
+            insertionPoint = -(insertionPoint + 1); // Convert insertion point to positive index
         }
-    }
 
-    // Sorts the edges array to maintain order
-    private void sortEdges() {
-        for (int i = 0; i < numEdges; i++) {
-            for (int j = i + 1; j < numEdges; j++) {
-                if (edges[i].getV1().getValue().compareTo(edges[j].getV1().getValue()) > 0) {
-                    Edge<F> temp = edges[i];
-                    edges[i] = edges[j];
-                    edges[j] = temp;
-                }
-            }
-        }
+        // Shift elements to the right to make space for the new element
+        System.arraycopy(array, insertionPoint, array, insertionPoint + 1, count - insertionPoint);
+        array[insertionPoint] = element; // Insert the new element
     }
-
 }

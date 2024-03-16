@@ -1,10 +1,23 @@
-public class Edge<F extends Comparable<F>> {
+/**
+ * Represents an edge in a graph, defined by a pair of vertices.
+ * The vertices are ordered such that the label of the start vertex is smaller
+ * than the label of the end vertex, ensuring consistency with graph requirements.
+ *
+ * @param <F> the type of the labels for vertices in the graph, which must be comparable.
+ */
+public class Edge<F extends Comparable<F>> implements Comparable<Edge<F>> {
     private final Vertex<F> v1; // Start vertex, label is smaller
     private final Vertex<F> v2; // End vertex, label is larger
 
+    /**
+     * Constructs an edge with the given start and end vertices.
+     * Automatically orders vertices to maintain graph invariants.
+     *
+     * @param v1 The start vertex of the edge.
+     * @param v2 The end vertex of the edge.
+     */
     public Edge(Vertex<F> v1, Vertex<F> v2) {
-        // Automatically order vertices to enforce the rule that v1 < v2
-        if (v1.getValue().compareTo(v2.getValue()) < 0) {
+        if (v1.compareTo(v2) < 0) {
             this.v1 = v1;
             this.v2 = v2;
         } else {
@@ -13,17 +26,31 @@ public class Edge<F extends Comparable<F>> {
         }
     }
 
-    // Accessor for the start vertex
+    /**
+     * Returns the start vertex of the edge.
+     *
+     * @return The start vertex.
+     */
     public Vertex<F> getV1() {
         return v1;
     }
 
-    // Accessor for the end vertex
+    /**
+     * Returns the end vertex of the edge.
+     *
+     * @return The end vertex.
+     */
     public Vertex<F> getV2() {
         return v2;
     }
 
-    // Edges are equal if they have the same start and end vertices
+    /**
+     * Indicates whether some other edge is "equal to" this one, based on the start and end vertices.
+     *
+     * @param o The reference object with which to compare.
+     * @return true if this object is the same as the obj argument; false otherwise.
+     */
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Edge)) return false;
@@ -31,19 +58,35 @@ public class Edge<F extends Comparable<F>> {
         return v1.equals(edge.getV1()) && v2.equals(edge.getV2());
     }
 
-    // Hash code method reflecting directed nature
-    // Multiply the current hash code by 31, a prime number,
-    // before adding the hash code of the next field.
-    // Using a prime number like 31 helps in distributing the hash codes
-    // more evenly across the hash tables.
-    // This reduces the chance of collisions
-    // (where different objects have the same hash code).
+    /**
+     * Returns a hash code value for the edge.
+     *
+     * @return A hash code value for this edge.
+     */
+    @Override
     public int hashCode() {
         return 31 * v1.hashCode() + v2.hashCode();
     }
 
-    // String representation
+    /**
+     * Compares this edge with another edge based on the start vertices' values.
+     *
+     * @param other The edge to compare to.
+     * @return A negative integer, zero, or a positive integer as this edge's start vertex
+     *         is less than, equal to, or greater than the other edge's start vertex.
+     */
+    @Override
+    public int compareTo(Edge<F> other) {
+        return v1.compareTo(other.getV1());
+    }
+
+    /**
+     * Returns a string representation of the edge in the format "(startVertex -> endVertex)".
+     *
+     * @return A string representation of the edge.
+     */
+    @Override
     public String toString() {
-        return "(" + v1 + " -> " + v2 + ")"; // For directed graph
+        return "(" + v1 + " -> " + v2 + ")";
     }
 }
