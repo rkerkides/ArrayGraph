@@ -149,20 +149,22 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
     }
 
     /**
-     * Searches for a vertex in the graph and returns it if found, null otherwise.
+     * Searches for the index of a specified vertex within the array of vertices.
      *
      * @param v the vertex to find
-     * @return the found vertex, or null if not found
+     * @return the index of the vertex if found within the array of vertices; otherwise, returns a negative
+     *         insertion point = - (returnedValue) - 1
      */
     private int findVertexIndex(Vertex<F> v) {
         return Arrays.binarySearch(vertices, 0, numVertices, v);
     }
 
     /**
-     * Searches for an edge in the graph and returns it if found, null otherwise.
+     * Searches for the index of a specified edge within the array of edges using binary search.
      *
      * @param e the edge to find
-     * @return the found edge, or null if not found
+     * @return the index of the edge if found within the array of edge; otherwise, returns a negative
+     *         insertion point = - (returnedValue) - 1
      */
     private int findEdgeIndex(Edge<F> e) {
         return Arrays.binarySearch(edges, 0, numEdges, e);
