@@ -32,14 +32,23 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      */
     @Override
     public boolean addEdge(Edge<F> e) {
-        // Check if adding the edge is possible (not exceeding capacity, vertices exist, edge doesn't exist)
-        if (numEdges >= edges.length || containsEdge(e) || !containsVertex(e.getV1()) || !containsVertex(e.getV2()))
-            return false;
+        if (numEdges >= edges.length) return false;
 
-        // Insert the edge in sorted order, sorting edges by the value of the first vertex
-        insertSorted(edges, e, numEdges++);
+        // Check if edge already exists
+        int edgeIndex = findEdgeIndex(e);
+        if (edgeIndex >= 0) return false; // Edge already exists
+
+        // Check for the existence of vertices
+        if (findVertexIndex(e.getV1()) < 0 || findVertexIndex(e.getV2()) < 0) return false; // One of the vertices does not exist
+
+        // Convert to insertion point
+        int insertionPoint = -edgeIndex - 1;
+
+        // Edge does not exist, proceed to insert it
+        insertElementInSortedOrder(edges, e, numEdges++, insertionPoint);
         return true;
     }
+
 
     /**
      * Adds a vertex to the graph if it doesn't already exist.
@@ -49,12 +58,17 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      */
     @Override
     public boolean addVertex(Vertex<F> v) {
-        // Check if adding the vertex is possible (not exceeding capacity, vertex doesn't exist)
-        if (numVertices >= vertices.length || containsVertex(v))
-            return false;
+        if (numVertices >= vertices.length) return false;
 
-        // Insert the vertex in sorted order
-        insertSorted(vertices, v, numVertices++);
+        int index = findVertexIndex(v);
+        if (index >= 0) return false; // Vertex already exists, index is the position
+
+        // Convert to insertion point
+        int insertionPoint = -index - 1;
+
+        // Vertex does not exist, proceed to insert it
+        insertElementInSortedOrder(vertices, v, numVertices++, insertionPoint);
+
         return true;
     }
 
@@ -135,43 +149,40 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
     }
 
     /**
-     * Checks if a vertex exists in the graph.
+     * Searches for a vertex in the graph and returns it if found, null otherwise.
      *
-     * @param v the vertex to check
-     * @return true if the vertex exists, false otherwise
+     * @param v the vertex to find
+     * @return the found vertex, or null if not found
      */
-    private boolean containsVertex(Vertex<F> v) {
-        return Arrays.binarySearch(vertices, 0, numVertices, v) >= 0;
+    private int findVertexIndex(Vertex<F> v) {
+        return Arrays.binarySearch(vertices, 0, numVertices, v);
     }
 
     /**
-     * Checks if an edge exists in the graph.
+     * Searches for an edge in the graph and returns it if found, null otherwise.
      *
-     * @param e the edge to check
-     * @return true if the edge exists, false otherwise
+     * @param e the edge to find
+     * @return the found edge, or null if not found
      */
-    private boolean containsEdge(Edge<F> e) {
-        return Arrays.binarySearch(edges, 0, numEdges, e) >= 0;
+    private int findEdgeIndex(Edge<F> e) {
+        return Arrays.binarySearch(edges, 0, numEdges, e);
     }
 
     /**
-     * Inserts an element into a sorted array in its correct position to maintain the sorted order.
-     * This method uses binary search to find the insertion point and shifts elements to the right
-     * to make space for the new element.
+     * Inserts a given element (vertex or edge) into the appropriate sorted array (vertices or edges)
+     * at a specified insertion point. This method is integral to maintaining the sorted state of vertices and edges
+     * in the graph, facilitating efficient data management and retrieval. It is called after an insertion point
+     * has been determined, ensuring the element is added in the correct order without disrupting
+     * the sorted integrity of the array.
      *
      * @param <T> the type of elements in the array, which must implement the Comparable interface
      * @param array the sorted array into which the element will be inserted
      * @param element the element to insert into the array
-     * @param count the current number of elements in the array
+     * @param count the current number of elements in the array, used to limit the search and shift scope
+     * @param insertionPoint the calculated position in the array where the new element should be inserted
      */
-    private <T> void insertSorted(T[] array, T element, int count) {
-        int insertionPoint = Arrays.binarySearch(array, 0, count, element);
-        if (insertionPoint < 0) {
-            insertionPoint = -(insertionPoint + 1); // Convert insertion point to positive index
-        }
-
-        // Shift elements to the right to make space for the new element
+    private <T> void insertElementInSortedOrder(T[] array, T element, int count, int insertionPoint) {
         System.arraycopy(array, insertionPoint, array, insertionPoint + 1, count - insertionPoint);
-        array[insertionPoint] = element; // Insert the new element
+        array[insertionPoint] = element; // Insert the new element at the calculated position
     }
 }
