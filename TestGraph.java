@@ -71,7 +71,7 @@ public class TestGraph {
 			sb.append(e.toString()).append(", ");
 		}
 		// Remove the last comma and space
-		if (sb.length() > 0) sb.setLength(sb.length() - 2);
+		if (!sb.isEmpty()) sb.setLength(sb.length() - 2);
 		return sb.toString();
 	}
 

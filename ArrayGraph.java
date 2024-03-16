@@ -2,8 +2,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
-    private Vertex<F>[] vertices;
-    private Edge<F>[] edges;
+    private final Vertex<F>[] vertices;
+    private final Edge<F>[] edges;
     private int numVertices = 0;
     private int numEdges = 0;
 

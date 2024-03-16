@@ -1,6 +1,6 @@
 public class Edge<F extends Comparable<F>> {
-    private Vertex<F> v1; // Start vertex, label is smaller
-    private Vertex<F> v2; // End vertex, label is larger
+    private final Vertex<F> v1; // Start vertex, label is smaller
+    private final Vertex<F> v2; // End vertex, label is larger
 
     public Edge(Vertex<F> v1, Vertex<F> v2) {
         // Automatically order vertices to enforce the rule that v1 < v2
