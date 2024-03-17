@@ -8,7 +8,7 @@
  * @param <F> the type of the label for the vertex, which must be Comparable
  */
 public class Vertex<F extends Comparable<F>> implements Comparable<Vertex<F>> {
-    private F value; // The value stored in this vertex
+    private final F value; // The value stored in this vertex
 
     /**
      * Constructs a Vertex with the specified value.
@@ -26,15 +26,6 @@ public class Vertex<F extends Comparable<F>> implements Comparable<Vertex<F>> {
      */
     public F getValue() {
         return value;
-    }
-
-    /**
-     * Sets the value of the vertex to the specified value.
-     *
-     * @param value The new value for the vertex.
-     */
-    public void setValue(F value) {
-        this.value = value;
     }
 
     /**
