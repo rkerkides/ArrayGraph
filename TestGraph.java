@@ -51,6 +51,12 @@ public class TestGraph {
 
 		System.out.println("Graph (iv):\nThe vertices are: " + printVertices(g));
 		System.out.println("The edges are: " + printEdges(g));
+
+		g.deleteEdge(edge2);
+		g.deleteVertex(v1);
+
+		System.out.println("Graph (iv):\nThe vertices are: " + printVertices(g));
+		System.out.println("The edges are: " + printEdges(g));
 	}
 
 	// Method to print vertices of the graph

@@ -25,6 +25,28 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
     }
 
     /**
+     * Adds a vertex to the graph if it doesn't already exist.
+     *
+     * @param v the vertex to add
+     * @return true if the vertex was added, false otherwise
+     */
+    @Override
+    public boolean addVertex(Vertex<F> v) {
+        if (numVertices >= vertices.length) return false;
+
+        int index = findVertexIndex(v);
+        if (index >= 0) return false; // Vertex already exists, index is the position
+
+        // Convert to insertion point
+        int insertionPoint = -index - 1;
+
+        // Vertex does not exist, proceed to insert it
+        insertElementInSortedOrder(vertices, v, numVertices++, insertionPoint);
+
+        return true;
+    }
+
+    /**
      * Adds an edge to the graph if it doesn't already exist and both vertices of the edge are present.
      *
      * @param e the edge to add
@@ -49,34 +71,50 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
         return true;
     }
 
-
     /**
-     * Adds a vertex to the graph if it doesn't already exist.
+     * Removes a specified vertex from the graph, including all edges connected to it, thereby maintaining the graph's structural integrity.
+     * The method locates the vertex using binary search. Upon finding the vertex, it is removed by shifting subsequent elements in the vertex array
+     * to the left, preserving the sorted order. Subsequently, the method iterates through the edge array, efficiently removing any edges connected
+     * to the deleted vertex while keeping unconnected edges intact. This streamlined removal process ensures the graph remains accurate and consistent.
      *
-     * @param v the vertex to add
-     * @return true if the vertex was added, false otherwise
+     * @param v the vertex to be deleted from the graph
+     * @return true if the vertex was found and successfully removed, false otherwise, indicating the vertex does not exist in the graph
      */
     @Override
-    public boolean addVertex(Vertex<F> v) {
-        if (numVertices >= vertices.length) return false;
-
+    public boolean deleteVertex(Vertex<F> v) {
         int index = findVertexIndex(v);
-        if (index >= 0) return false; // Vertex already exists, index is the position
+        if (index >= 0) {
+            System.arraycopy(vertices, index + 1, vertices, index, numVertices - index - 1);
+            vertices[--numVertices] = null;
 
-        // Convert to insertion point
-        int insertionPoint = -index - 1;
+            int compactIndex = 0; // Index for the next unmarked edge
+            for (int i = 0; i < numEdges; i++) {
+                if (!edges[i].getV1().equals(v) && !edges[i].getV2().equals(v)) {
+                    if (compactIndex != i) {
+                        edges[compactIndex] = edges[i];
+                    }
+                    compactIndex++;
+                } // Implicit discard of edges connected to the vertex
+            }
 
-        // Vertex does not exist, proceed to insert it
-        insertElementInSortedOrder(vertices, v, numVertices++, insertionPoint);
+            for (int i = compactIndex; i < numEdges; i++) {
+                edges[i] = null;
+            }
 
-        return true;
+            numEdges = compactIndex; // Update the count of edges
+            return true;
+        }
+        return false;
     }
 
     /**
-     * Deletes an edge from the graph if it exists.
+     * Deletes an existing edge from the graph, ensuring the graph's integrity by updating the edge array accordingly.
+     * This operation involves a binary search to locate the target edge within the edges array. If the edge is found,
+     * it is removed by shifting subsequent elements in the array to the left, effectively filling the gap left by the deleted edge.
+     * This maintains the edges array in a compact and sorted state after the deletion, and the edge count is updated to reflect the removal.
      *
-     * @param e the edge to delete
-     * @return true if the edge was deleted, false otherwise
+     * @param e the edge to be deleted from the graph
+     * @return true if the edge was found and successfully removed, false otherwise, indicating the edge does not exist in the graph
      */
     @Override
     public boolean deleteEdge(Edge<F> e) {
@@ -88,45 +126,6 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
         }
         return false;
     }
-
-    /**
-     * Deletes a vertex from the graph if it exists, along with any edges connected to it.
-     *
-     * @param v the vertex to delete
-     * @return true if the vertex was deleted, false otherwise
-     */
-    @Override
-    public boolean deleteVertex(Vertex<F> v) {
-        int index = findVertexIndex(v);
-        if (index >= 0) {
-            // Remove the vertex by shifting elements
-            System.arraycopy(vertices, index + 1, vertices, index, numVertices - index - 1);
-            vertices[--numVertices] = null;
-
-            // Instead of deleting edges connected to the vertex one by one,
-            // mark them and then compact the array in one pass.
-            int compactIndex = 0; // Index for where to place the next unmarked edge
-            for (int i = 0; i < numEdges; i++) {
-                if (!edges[i].getV1().equals(v) && !edges[i].getV2().equals(v)) {
-                    // If the edge is not connected to the deleted vertex, retain it
-                    if (compactIndex != i) {
-                        edges[compactIndex] = edges[i];
-                    }
-                    compactIndex++;
-                } // Edges connected to the deleted vertex are implicitly discarded
-            }
-
-            // Fill the "empty" part of the array with nulls
-            for (int i = compactIndex; i < numEdges; i++) {
-                edges[i] = null;
-            }
-
-            numEdges = compactIndex; // Update the number of edges
-            return true;
-        }
-        return false;
-    }
-
 
     /**
      * Returns a set containing all the vertices in the graph.
