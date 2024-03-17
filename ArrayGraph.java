@@ -80,7 +80,7 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      */
     @Override
     public boolean deleteEdge(Edge<F> e) {
-        int index = Arrays.binarySearch(edges, 0, numEdges, e);
+        int index = findEdgeIndex(e);
         if (index >= 0) {
             System.arraycopy(edges, index + 1, edges, index, numEdges - index - 1);
             edges[--numEdges] = null;
@@ -97,7 +97,7 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      */
     @Override
     public boolean deleteVertex(Vertex<F> v) {
-        int index = Arrays.binarySearch(vertices, 0, numVertices, v);
+        int index = findVertexIndex(v);
         if (index >= 0) {
             // Remove the vertex by shifting elements
             System.arraycopy(vertices, index + 1, vertices, index, numVertices - index - 1);
@@ -152,7 +152,9 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      * Searches for the index of a specified vertex within the array of vertices.
      *
      * @param v the vertex to find
-     * @return the index of the vertex if found within the array of vertices; otherwise, returns a negative
+     * @return the index of the vertex if found within the array of vertices; otherwise, returns a negative value.
+     *         This result can then be converted into an appropriate insertion point for the vertex
+     *         by negating and decrementing the returned value:
      *         insertion point = - (returnedValue) - 1
      */
     private int findVertexIndex(Vertex<F> v) {
@@ -163,7 +165,9 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      * Searches for the index of a specified edge within the array of edges using binary search.
      *
      * @param e the edge to find
-     * @return the index of the edge if found within the array of edge; otherwise, returns a negative
+     * @return the index of the edge if found within the array of edge; otherwise, returns a negative value.
+     *         This result can then be converted into an appropriate insertion point for the vertex
+     *         by negating and decrementing the returned value:
      *         insertion point = - (returnedValue) - 1
      */
     private int findEdgeIndex(Edge<F> e) {
