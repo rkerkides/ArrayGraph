@@ -1,5 +1,5 @@
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -137,7 +137,8 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      */
     @Override
     public Set<Vertex<F>> vertexSet() {
-        return new HashSet<>(Arrays.asList(vertices).subList(0, numVertices));
+        // Return a LinkedHashSet to maintain order
+        return new LinkedHashSet<>(Arrays.asList(vertices).subList(0, numVertices));
     }
 
     /**
@@ -147,7 +148,8 @@ public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
      */
     @Override
     public Set<Edge<F>> edgeSet() {
-        return new HashSet<>(Arrays.asList(edges).subList(0, numEdges));
+        // Return a LinkedHashSet to maintain order
+        return new LinkedHashSet<>(Arrays.asList(edges).subList(0, numEdges));
     }
 
     /**
