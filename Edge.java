@@ -72,15 +72,21 @@ public class Edge<F extends Comparable<F>> implements Comparable<Edge<F>> {
     }
 
     /**
-     * Compares this edge with another edge based on the start vertices' values.
+     * Compares this edge with another edge based on the start vertices' values. If they are equal, the end vertices'
+     * values are compared.
      *
      * @param other The edge to compare to.
-     * @return A negative integer, zero, or a positive integer as this edge's start vertex
-     *         is less than, equal to, or greater than the other edge's start vertex.
+     * @return A negative integer, zero, or a positive integer as this edge's vertices
+     *         are less than, equal to, or greater than the other edge's vertices.
      */
     @Override
     public int compareTo(Edge<F> other) {
-        return v1.compareTo(other.getV1());
+        int startComparison = v1.compareTo(other.getV1());
+        if (startComparison != 0) {
+            return startComparison;
+        } else {
+            return v2.compareTo(other.getV2());
+        }
     }
 
     /**
