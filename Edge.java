@@ -4,6 +4,9 @@
  * than the label of the end vertex, ensuring consistency with graph requirements.
  *
  * @param <F> the type of the labels for vertices in the graph, which must be comparable.
+ *
+ * @author Renos Kerkides
+ * @studentNumber 2923219K
  */
 public class Edge<F extends Comparable<F>> implements Comparable<Edge<F>> {
     private final Vertex<F> v1; // Start vertex, label is smaller

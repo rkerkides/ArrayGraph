@@ -6,6 +6,9 @@
  * within collections and other data structures.
  *
  * @param <F> the type of the label for the vertex, which must be Comparable
+ *
+ * @author Renos Kerkides
+ * @studentNumber 2923219K
  */
 public class Vertex<F extends Comparable<F>> implements Comparable<Vertex<F>> {
     private final F value; // The value stored in this vertex

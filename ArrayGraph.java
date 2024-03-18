@@ -8,6 +8,9 @@ import java.util.Set;
  * added vertices, and maintains vertices and edges sorted in ascending order.
  *
  * @param <F> the type of the labels for vertices in the graph, which must be comparable
+ *
+ * @author Renos Kerkides
+ * @studentNumber 2923219K
  */
 @SuppressWarnings("unchecked")
 public class ArrayGraph<F extends Comparable<F>> implements Graph<F> {
